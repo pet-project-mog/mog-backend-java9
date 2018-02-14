@@ -7,8 +7,13 @@
     <groupId>br.com.caelum</groupId>
     <artifactId>mog</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>    
-    
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>infra</module>
+        <module>domain</module>
+        <module>application</module>
+    </modules>
+
     <properties>
         <maven.compiler.source>9</maven.compiler.source>
         <maven.compiler.target>9</maven.compiler.target>

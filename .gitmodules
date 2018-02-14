@@ -1,0 +1,9 @@
+[submodule "application"]
+	path = application
+	url = https://github.com/pet-project-mog/mog-backend-application
+[submodule "infra"]
+	path = infra
+	url = https://github.com/pet-project-mog/mog-backend-infra
+[submodule "domain"]
+	path = domain
+	url = https://github.com/pet-project-mog/mog-backend-domain
