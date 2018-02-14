@@ -20,12 +20,9 @@ Toda transição entre as fases do fluxo deve ser feita através de **Pull Reque
 
 Para baixar o projeto siga os seguintes passos:
 
-1. `git clone https://github.com/pet-project-mog/mog-backend.git`
-1. Acesse o diretório do projeto
-1. `git submodule sync`
-1. `git submodule update --init --recursive`
-1. `git branch -r | grep -v '\->' | while read remote; do git branch --track "${remote#origin/}" "$remote"; done` # Para trackear todas as branchs
-1. `git pull --all` 
+1. Efetue o clone do projeto => `git clone https://github.com/pet-project-mog/mog-backend.git`
+1. Acesse o diretório do projeto => `cd mog-backend` 
+1. Execute o script para atualização/sincronização dos sub-módulos => `./sync-submodule.sh` 
 --- 
 
 ## Tecnologias utilizadas
