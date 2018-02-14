@@ -2,7 +2,7 @@
 
 Esse projeto tem como finalidade geração de propostas em documentos Word (_.doc_) ou Open Document (_odt_).
 
-Nesse projeto utilizaremos o **Git Flow** (também conhecido como **Git branch model**) para a transição do código da etapa de desenvolvimento para produção
+Nesse projeto utilizaremos o **Git Flow** (também conhecido como **Git branch model**) para a transição do código entre as etapas de desenvolvimento até produção. (Somente para os sub-módulos)
 
 
 Nosso projeto será dividido nas seguintes branches: 
