@@ -1,0 +1,87 @@
+workflows:
+  version: 2
+  pipeline:
+    jobs:
+      - checkout_code
+      - resolve_dependencies:
+          requires:
+            - checkout_code
+      - unit_test:
+          requires:
+            - resolve_dependencies
+
+
+version: 2
+
+defaults: &mavenAndworkdir
+  docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:9-jdk
+
+  environment:
+    # Customize the JVM maximum heap limit
+    MAVEN_OPTS: -Xmx3200m
+
+  working_directory: ~/project
+
+
+
+jobs:
+  #Phases
+
+  checkout_code:
+    <<: *mavenAndworkdir
+
+    steps:
+      - checkout
+
+
+      # Fetch all git submodules
+      - run: git submodule sync
+      - run: git submodule update --init --recursive
+
+     # Save repo in cache
+      - save_cache:
+          paths:
+            - ~/project
+          key: repo-{{ .BuildNum }}
+
+  ## Phase Resolve Deps
+  resolve_dependencies:
+    <<: *mavenAndworkdir
+
+    steps:
+
+      # Restore dependencies and repo from cache
+      - restore_cache:
+          keys:
+          - repo-{{ .BuildNum }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
+
+
+      # Download and cache dependencies
+      - run: mvn dependency:go-offline
+
+      # Save dependencies in cache
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: dependencies-{{ checksum "pom.xml" }}
+
+  ## Compile and Run Test Suite
+  unit_test:
+    <<: *mavenAndworkdir
+
+
+    steps:
+      # Restore dependencies and repo from cache
+      - restore_cache:
+          keys:
+          - repo-{{ .BuildNum }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
+      # run tests!
+      - run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
