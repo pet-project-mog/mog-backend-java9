@@ -1,6 +1,6 @@
 # Mog Backend
 
-Esse projeto tem como finalidade geração de propostas em documentos Word (_.doc_) ou Open Document (_odt_).
+Esse projeto tem como finalidade geração de propostas em documentos Word (_.doc_) ou Open Document (_.odt_).
 
 Nesse projeto utilizaremos o **Git Flow** (também conhecido como **Git branch model**) para a transição do código entre as etapas de desenvolvimento até produção.
 
@@ -21,7 +21,7 @@ Toda transição entre as fases do fluxo deve ser feita através de **Pull Reque
 Para baixar o projeto siga os seguintes passos:
 
 1. `git clone https://github.com/pet-project-mog/mog-backend.git`
-1. Acesse o diretrio do projeto
+1. Acesse o diretório do projeto
 1. `git submodule sync`
 1. `git submodule update --init --recursive`
 1. `git branch -r | grep -v '\->' | while read remote; do git branch --track "${remote#origin/}" "$remote"; done` # Para trackear todas as branchs
