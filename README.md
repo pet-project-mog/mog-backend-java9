@@ -1,3 +1,8 @@
+[![CI Pipeline Status](https://circleci.com/gh/pet-project-mog/mog-backend/tree/master.svg?style=svg)](https://circleci.com/gh/pet-project-mog/mog-backend/tree/master)
+![Coverage Code](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=coverage)
+![Bugs](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=bugs)
+
+
 # Mog Backend
 
 Esse projeto tem como finalidade geração de propostas em documentos Word (_.doc_) ou Open Document (_.odt_).
