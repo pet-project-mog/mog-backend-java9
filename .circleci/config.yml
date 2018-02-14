@@ -44,7 +44,7 @@ jobs:
       - save_cache:
           paths:
             - ~/project
-          key: repo-{{ .BuildNum }}
+          key: repo-{{ .Environment.CIRCLE_SHA1 }}
 
   ## Phase Resolve Deps
   resolve_dependencies:
@@ -55,7 +55,7 @@ jobs:
       # Restore dependencies and repo from cache
       - restore_cache:
           keys:
-          - repo-{{ .BuildNum }}
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
           - dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
           - dependencies-
@@ -79,7 +79,7 @@ jobs:
       # Restore dependencies and repo from cache
       - restore_cache:
           keys:
-          - repo-{{ .BuildNum }}
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
           - dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
           - dependencies-
