@@ -1,4 +1,6 @@
-# Anchors
+version: 2
+
+
 anchors_references:
   maven_container_configuration: &maven_container_configuration
     docker:
@@ -15,7 +17,7 @@ anchors_references:
   restore_cache_configuration: &restore_cache_configuration
       restore_cache:
           keys:
-          - repo-{{ checksum "pom.xml" }}
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
           - dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
           - dependencies-
@@ -23,7 +25,7 @@ anchors_references:
   save_cache_configuration: &save_cache_configuration
       # Save project status
       save_cache:
-          key: repo-{{ checksum "pom.xml" }}
+          key: repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/project
       # Save sonar and maven dependencies
@@ -32,7 +34,6 @@ anchors_references:
           paths:
             - ~/.m2/repository
             - ~/.sonar/cache
-
 
 
 workflows:
@@ -69,7 +70,7 @@ workflows:
             - generate_docker_image
 
 
-version: 2
+
 
 jobs:
   #Phases
