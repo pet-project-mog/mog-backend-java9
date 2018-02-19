@@ -14,27 +14,44 @@ anchors_references:
     working_directory: ~/project
 
 
-  restore_cache_configuration: &restore_cache_configuration
+  restore_repo_cache: &restore_repo_cache
       restore_cache:
           keys:
           - repo-{{ .Branch }}-{{ .Revision }}
-          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
           - repo-{{ .Branch }}
           - repo-
+  restore_dependencies_cache: &restore_dependencies_cache
+      restore_cache:
+          keys:
+          - dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
           - dependencies-
-
-  save_cache_configuration: &save_cache_configuration
+  restore_sonar_cache: &restore_sonar_cache
+      restore_cache:
+          keys:
+          - sonar-{{ .Environment.CIRCLE_SHA1 }}
+          # fallback to using the latest cache if no exact match is found
+          - sonar-
+  save_repo_cache: &save_repo_cache
       # Save project status
       save_cache:
           key: repo-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/project
-      # Save sonar and maven dependencies
+  save_dependencies_cache: &save_dependencies_cache
+      # Save maven dependencies
       save_cache:
           key: dependencies-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2/repository
+            - ~/.sonar/cache
+
+  save_sonar_cache: &save_sonar_cache
+      # Save sonar cache
+      save_cache:
+          key: sonar-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
             - ~/.sonar/cache
 
 
@@ -87,19 +104,20 @@ jobs:
       - run: git submodule sync
       - run: git submodule update --init --recursive
 
-      - *save_cache_configuration
+      - *save_repo_cache
 
   ## Phase Resolve Deps
   compile:
     <<: *maven_container_configuration
 
     steps:
-      - *restore_cache_configuration
+      - *restore_repo_cache
 
       # Download and cache dependencies
       - run: mvn clean compile
 
-      - *save_cache_configuration
+      - *save_dependencies_cache
+
 
   ## Compile and Run Test Suite
   unit_test:
@@ -107,46 +125,57 @@ jobs:
 
 
     steps:
-      - *restore_cache_configuration
+      - *restore_repo_cache
+      - *restore_dependencies_cache
+      - *restore_sonar_cache
 
       # run tests!
       - run: mvn test
 
-      - *save_cache_configuration
+      - *save_dependencies_cache
+      - *save_sonar_cache
 
   integration_test:
     <<: *maven_container_configuration
 
     steps:
-      - *restore_cache_configuration
+      - *restore_repo_cache
+      - *restore_dependencies_cache
+      - *restore_sonar_cache
 
       # run tests!
       - run: mvn test
 
-      - *save_cache_configuration
+      - *save_dependencies_cache
+      - *save_sonar_cache
 
   acceptance_test:
     <<: *maven_container_configuration
 
     steps:
-      - *restore_cache_configuration
+      - *restore_repo_cache
+      - *restore_dependencies_cache
+      - *restore_sonar_cache
 
       # run tests!
       - run: mvn test
 
-      - *save_cache_configuration
+      - *save_dependencies_cache
+      - *save_sonar_cache
 
   ## Packaging
   package:
     <<: *maven_container_configuration
 
     steps:
-      - *restore_cache_configuration
+      - *restore_repo_cache
+      - *restore_dependencies_cache
 
       # package all modules
       - run: mvn package -DSkipTest
 
-      - *save_cache_configuration
+      - *save_dependencies_cache
+      - *save_repo_cache
 
 
   ## Build Application Container Image
@@ -157,12 +186,10 @@ jobs:
     working_directory: ~/project
 
     steps:
-      - *restore_cache_configuration
+      - *restore_repo_cache
 
       - run: find . -name "*.jar"
       - run: docker --version
-
-      - *save_cache_configuration
 
   #Send to Production
   merge_with_master:
@@ -170,9 +197,7 @@ jobs:
         - image: docker:17.12.0-ce-git
     working_directory: ~/project
     steps:
-      - *restore_cache_configuration
+      - *restore_repo_cache
 
       - run: ls
       - run: env
-
-      - *save_cache_configuration
