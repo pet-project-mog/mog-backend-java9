@@ -34,18 +34,6 @@ workflows:
 
 version: 2
 
-defaults: &mavenAndworkdir
-  docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:9-jdk
-
-  environment:
-    # Customize the JVM maximum heap limit
-    MAVEN_OPTS: -Xmx3200m
-
-  working_directory: ~/project
-
-
 
 jobs:
   #Phases
@@ -61,35 +49,19 @@ jobs:
       - run: git submodule sync
       - run: git submodule update --init --recursive
 
-     # Save repo in cache
-      - save_cache:
-          paths:
-            - ~/project
-          key: repo-{{ .Environment.CIRCLE_SHA1 }}
+      - *save_cache_configuration
 
   ## Phase Resolve Deps
   compile:
     <<: *mavenAndworkdir
 
     steps:
-
-      # Restore dependencies and repo from cache
-      - restore_cache:
-          keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
-          - dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - dependencies-
-
+      - *restore_cache_configuration
 
       # Download and cache dependencies
       - run: mvn clean compile
 
-      # Save dependencies in cache
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: dependencies-{{ checksum "pom.xml" }}
+      - *save_cache_configuration
 
   ## Compile and Run Test Suite
   unit_test:
@@ -97,97 +69,112 @@ jobs:
 
 
     steps:
-      # Restore dependencies and repo from cache
-      - restore_cache:
-          keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
-          - dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - dependencies-
+      - *restore_cache_configuration
+
       # run tests!
       - run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+
+      - *save_cache_configuration
 
   integration_test:
     <<: *mavenAndworkdir
 
     steps:
-      # Restore dependencies and repo from cache
-      - restore_cache:
-          keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
-          - dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - dependencies-
+      - *restore_cache_configuration
+
       # run tests!
       - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+
+      - *save_cache_configuration
 
   acceptance_test:
     <<: *mavenAndworkdir
 
     steps:
-      # Restore dependencies and repo from cache
-      - restore_cache:
-          keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
-          - dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - dependencies-
+      - restore_cache_configuration
+
       # run tests!
       - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+
+      - *save_cache_configuration
 
   ## Packaging
   package:
     <<: *mavenAndworkdir
 
     steps:
-      # Save dependencies in cache
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: target-{{ .Environment.CIRCLE_SHA1 }}
-      # Restore dependencies and repo from cache
-      - restore_cache:
-          keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
-          - dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - dependencies-
-      # run tests!
+      - *restore_cache_configuration
+
+      # package all modules
       - run: mvn package -DSkipTest
+
+      - *save_cache_configuration
+
 
   ## Build Application Container Image
   generate_docker_image:
     docker:
-        - image: docker:17.12.0-ce-git
+      - image: docker:17.12.0-ce-git
 
     working_directory: ~/project
 
     steps:
-      # Restore dependencies and repo from cache
-      - restore_cache:
-          keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
-          - target-{{ .Environment.CIRCLE_SHA1 }}
-          - dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - dependencies-
+      - *restore_cache_configuration
+
       - run: find . -name "*.jar"
       - run: docker --version
+
+      - *save_cache_configuration
 
   #Send to Production
   merge_with_master:
     docker:
-        - image: docker:17.12.0-ce-git
+      - image: docker:17.12.0-ce-git
+    working_directory: ~/project
     steps:
-      # Restore dependencies and repo from cache
-      - restore_cache:
-          keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
-          - target-{{ .Environment.CIRCLE_SHA1 }}
-          - dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - dependencies-
-      # run tests!
+      - *restore_cache_configuration
+
       - run: ls
       - run: git status
 
+      - *save_cache_configuration
+
+# Anchors
+mavenAndworkdir: &mavenAndworkdir
+  docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:9-jdk
+
+  environment:
+    # Customize the JVM maximum heap limit
+    MAVEN_OPTS: -Xmx3200m
+
+  working_directory: ~/project
+
+
+restore_cache_configuration: &restore_cache_configuration
+    restore_cache:
+        keys:
+        - repo-{{ .Environment.CIRCLE_SHA1 }}
+        - sonar-{{ .Environment.CIRCLE_SHA1 }}
+        - dependencies-{{ checksum "pom.xml" }}
+        # fallback to using the latest cache if no exact match is found
+        - dependencies-
+        - sonar-
+
+save_cache_configuration: &save_cache_configuration
+    # Save project status
+    save_cache:
+        paths:
+          - ~/project
+        key: repo-{{ .Environment.CIRCLE_SHA1 }}
+    # Save sonar configs
+    save_cache:
+        paths:
+          - ~/.sonar
+        key: sonar-{{ .Environment.CIRCLE_SHA1 }}
+    # Save maven dependencies
+    save_cache:
+        paths:
+          - ~/.m2
+        key: dependencies-{{ checksum "pom.xml" }}
