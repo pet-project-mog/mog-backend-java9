@@ -83,7 +83,12 @@ workflows:
   version: 2
   pipeline:
     jobs:
-      - checkout_code
+      - checkout_code:
+          filters:
+            branches:
+              only:
+                - feature
+                - develop
       - compile:
           filters:
             branches:
