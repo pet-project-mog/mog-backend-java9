@@ -138,35 +138,36 @@ jobs:
       - *save_cache_configuration
 
 # Anchors
-mavenAndworkdir: &mavenAndworkdir
-  docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:9-jdk
+anchors_references:
+  mavenAndworkdir: &mavenAndworkdir
+    docker:
+        # specify the version you desire here
+        - image: circleci/openjdk:9-jdk
 
-  environment:
-    # Customize the JVM maximum heap limit
-    MAVEN_OPTS: -Xmx3200m
+    environment:
+      # Customize the JVM maximum heap limit
+      MAVEN_OPTS: -Xmx3200m
 
-  working_directory: ~/project
+    working_directory: ~/project
 
 
-restore_cache_configuration: &restore_cache_configuration
-    restore_cache:
-        keys:
-        - repo-{{ .Environment.CIRCLE_SHA1 }}
-        - dependencies-{{ checksum "pom.xml" }}
-        # fallback to using the latest cache if no exact match is found
-        - dependencies-
+  restore_cache_configuration: &restore_cache_configuration
+      restore_cache:
+          keys:
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
 
-save_cache_configuration: &save_cache_configuration
-    # Save project status
-    save_cache:
-        key: repo-{{ .Environment.CIRCLE_SHA1 }}
-        paths:
-          - ~/project
-    # Save sonar and maven dependencies
-    save_cache:
-        key: dependencies-{{ checksum "pom.xml" }}
-        paths:
-          - ~/.m2/repository
-          - ~/.sonar/cache
+  save_cache_configuration: &save_cache_configuration
+      # Save project status
+      save_cache:
+          key: repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/project
+      # Save sonar and maven dependencies
+      save_cache:
+          key: dependencies-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2/repository
+            - ~/.sonar/cache
