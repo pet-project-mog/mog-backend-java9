@@ -72,7 +72,7 @@ jobs:
       - *restore_cache_configuration
 
       # run tests!
-      - run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+      - run: mvn test
 
       - *save_cache_configuration
 
@@ -83,7 +83,7 @@ jobs:
       - *restore_cache_configuration
 
       # run tests!
-      - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+      - run: mvn test
 
       - *save_cache_configuration
 
@@ -94,7 +94,7 @@ jobs:
       - restore_cache_configuration
 
       # run tests!
-      - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+      - run: mvn test
 
       - *save_cache_configuration
 
@@ -114,7 +114,7 @@ jobs:
   ## Build Application Container Image
   generate_docker_image:
     docker:
-      - image: docker:17.12.0-ce-git
+        - image: docker:17.12.0-ce-git
 
     working_directory: ~/project
 
@@ -129,7 +129,7 @@ jobs:
   #Send to Production
   merge_with_master:
     docker:
-      - image: docker:17.12.0-ce-git
+        - image: docker:17.12.0-ce-git
     working_directory: ~/project
     steps:
       - *restore_cache_configuration
