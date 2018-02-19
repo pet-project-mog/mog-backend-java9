@@ -28,16 +28,16 @@ workflows:
             - unit_test
             - integration_test
             - acceptance_test
-#      - generate_docker_image:
-#          require:
-#            - package
-#      - merge_with_master:
-#          filters:
-#            branches:
-#              only:
-#                - release
-#          require:
-#            - generate_docker_image
+      - generate_docker_image:
+          require:
+            - package
+      - merge_with_master:
+          filters:
+            branches:
+              only:
+                - release
+          require:
+            - generate_docker_image
 
 
 version: 2
@@ -114,6 +114,7 @@ jobs:
           - dependencies-
       # run tests!
       - run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+
   integration_test:
     <<: *mavenAndworkdir
 
@@ -127,6 +128,7 @@ jobs:
           - dependencies-
       # run tests!
       - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+
   acceptance_test:
     <<: *mavenAndworkdir
 
@@ -140,6 +142,8 @@ jobs:
           - dependencies-
       # run tests!
       - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+
+  ## Packaging
   package:
     <<: *mavenAndworkdir
 
@@ -158,9 +162,11 @@ jobs:
           - dependencies-
       # run tests!
       - run: mvn package -DSkipTest
+
+  ## Build Application Container Image
   generate_docker_image:
     docker:
-      - image: docker:17.12.0-ce-git
+        - image: docker:17.12.0-ce-git
 
     working_directory: ~/project
 
@@ -175,9 +181,11 @@ jobs:
           - dependencies-
       - run: find . -name "*.jar*
       - run: docker --version
+
+  #Send to Production
   merge_with_master:
     docker:
-      - image: docker:17.12.0-ce-git
+        - image: docker:17.12.0-ce-git
     steps:
       # Restore dependencies and repo from cache
       - restore_cache:
