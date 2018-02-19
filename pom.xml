@@ -76,6 +76,7 @@
 
 
 
+
     <profiles>
         <profile>
             <id>coverage-analyze</id>
