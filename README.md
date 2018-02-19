@@ -1,6 +1,8 @@
 [![CI Pipeline Status](https://circleci.com/gh/pet-project-mog/mog-backend/tree/master.svg?style=svg)](https://circleci.com/gh/pet-project-mog/mog-backend/tree/master)
-![Coverage Code](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=coverage)
-![Bugs](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=bugs)
+[![Coverage Code](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=coverage)](https://sonarcloud.io/dashboard?id=br.com.caelum%3Amog)
+[![Lines Of Code](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=ncloc)](https://sonarcloud.io/dashboard?id=br.com.caelum%3Amog)
+[![Technical Debit](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=sqale_index)](https://sonarcloud.io/dashboard?id=br.com.caelum%3Amog)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=br.com.caelum%3Amog&metric=bugs)](https://sonarcloud.io/dashboard?id=br.com.caelum%3Amog)
 
 
 # Mog Backend
