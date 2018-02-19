@@ -94,7 +94,7 @@ workflows:
             - unit_test
             - integration_test
             - acceptance_test
-      - generate_docker_image:
+      - publish_docker_image:
           requires:
             - package
       - merge_with_master:
@@ -103,7 +103,7 @@ workflows:
               only:
                 - release
           requires:
-            - generate_docker_image
+            - publish_docker_image
 
 
 
@@ -182,7 +182,7 @@ jobs:
 
   ## Packaging
   package:
-    <<: *maven_container_configuration
+    <<: *maven_and_docker_container_configuration
 
     steps:
       - *restore_repo_cache
@@ -196,7 +196,7 @@ jobs:
 
 
   ## Build Application Container Image
-  generate_docker_image:
+  publish_docker_image:
     <<: *maven_and_docker_container_configuration
 
     steps:
