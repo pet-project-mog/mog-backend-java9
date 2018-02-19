@@ -25,10 +25,10 @@ workflows:
             - integration_test
             - acceptance_test
       - generate_docker_image:
-          require:
+          requires:
             - package
       - merge_with_master:
-          require:
+          requires:
             - generate_docker_image
 
 
