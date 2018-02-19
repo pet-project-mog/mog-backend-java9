@@ -234,7 +234,6 @@ jobs:
 
     environment:
       - *docker_integration
-      - MOG_DOCKER_IMAGE_VERSION: $CIRCLE_BUILD_NUM
 
     steps:
       - setup_remote_docker
@@ -254,6 +253,6 @@ jobs:
       - run: git rebase release
       - run: git push origin master
 
-      - run: mvn -s settings.xml package -DskipTests
+      - run: mvn -s settings.xml package -DskipTests -Dmog.docker.currentTag=$CIRCLE_WORKFLOW_NUM
 
       - *save_dependencies_cache
