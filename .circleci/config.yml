@@ -123,6 +123,7 @@ workflows:
             branches:
               only:
                 - release
+                - hotfix
           requires:
             - unit_test
             - integration_test
@@ -140,6 +141,7 @@ workflows:
             branches:
               only:
                 - release
+                - hotfix
           requires:
             - hotfix_approval
             - package
