@@ -5,6 +5,8 @@ anchors_references:
 
   sonar_integration: &sonar_integration
     - SONAR_INTEGRATION: yes
+  docker_integration: &docker_integration
+    - DOCKER_INTEGRATION: yes
 
   maven_container_configuration: &maven_container_configuration
     docker:
@@ -193,9 +195,14 @@ jobs:
   package:
     <<: *maven_and_docker_container_configuration
 
+    environment:
+      - *docker_integration
+
     steps:
       - *restore_repo_cache
       - *restore_dependencies_cache
+
+      - setup_remote_docker
 
       # package all modules
       - run: mvn package -DskipTests
@@ -210,6 +217,7 @@ jobs:
 
     steps:
       - *restore_repo_cache
+      - setup_remote_docker
 
       - run: find . -name "*.jar"
       - run: docker --version
