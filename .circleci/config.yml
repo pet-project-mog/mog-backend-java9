@@ -6,7 +6,7 @@ workflows:
           filters:
             branches:
               only:
-                - develop
+                - master
       - compile:
           requires:
             - checkout_code
@@ -17,10 +17,6 @@ workflows:
           requires:
             - compile
       - acceptance_test:
-          filters:
-            branches:
-              only:
-                - release
           requires:
             - compile
       - package:
@@ -32,10 +28,6 @@ workflows:
           require:
             - package
       - merge_with_master:
-          filters:
-            branches:
-              only:
-                - release
           require:
             - generate_docker_image
 
