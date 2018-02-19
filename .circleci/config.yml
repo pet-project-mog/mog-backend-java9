@@ -263,7 +263,7 @@ jobs:
 
       - *restore_dependencies_cache
 
-      - run: git rebase release
+      - run: git rebase $CIRCLE_BRANCH
       - run: git push origin master
 
       - run: mvn -s settings.xml package -DskipTests -Dmog.docker.currentTag=$CIRCLE_WORKFLOW_ID
