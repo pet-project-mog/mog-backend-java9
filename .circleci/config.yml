@@ -105,8 +105,9 @@ workflows:
       - integration_test:
           filters:
             branches:
-              ignore:
-                - master
+              only:
+                - release
+                - hotfix
           requires:
             - compile
       - acceptance_test:
@@ -114,6 +115,7 @@ workflows:
             branches:
               only:
                 - release
+                - hotfix
           requires:
             - compile
       - package:
@@ -125,12 +127,21 @@ workflows:
             - unit_test
             - integration_test
             - acceptance_test
+      - hotfix_approval:
+          type: approval
+          filters:
+            branches:
+              only:
+                - hotfix
+          requires:
+            - package
       - merge_with_master:
           filters:
             branches:
               only:
                 - release
           requires:
+            - hotfix_approval
             - package
 
 
@@ -219,7 +230,7 @@ jobs:
 
   ## Packaging
   package:
-    <<: *maven_and_docker_container_configuration
+    <<: *maven_container_configuration
 
     steps:
       - *restore_repo_cache
@@ -234,18 +245,25 @@ jobs:
 
     environment:
       - *docker_integration
-      - MOG_DOCKER_IMAGE_VERSION: $CIRCLE_BUILD_NUM
 
     steps:
       - setup_remote_docker
 
+      - add_ssh_keys:
+          fingerprints:
+            - "fb:01:d9:c1:7e:74:c3:d9:aa:89:d9:bc:92:cc:1f:e3"
+
       - checkout
+
+      # Fetch all git submodules
+      - run: git submodule sync
+      - run: git submodule update --init --recursive
 
       - *restore_dependencies_cache
 
       - run: git rebase release
       - run: git push origin master
 
-      - run: mvn -s settings.xml package -DskipTests
+      - run: mvn -s settings.xml package -DskipTests -Dmog.docker.currentTag=$CIRCLE_WORKFLOW_ID
 
       - *save_dependencies_cache
