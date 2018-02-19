@@ -2,6 +2,10 @@ version: 2
 
 
 anchors_references:
+
+  sonar_integration: &sonar_integration
+    - SONAR_INTEGRATION: yes
+
   maven_container_configuration: &maven_container_configuration
     docker:
         # specify the version you desire here
@@ -16,10 +20,7 @@ anchors_references:
     docker:
         # specify the version you desire here
         - image: circleci/openjdk:9-jdk
-          environment:
-            - DOCKER_HOST=tcp://docker:2375
         - image: docker:17.12.0-ce-git
-          name: docker
 
     environment:
       # Customize the JVM maximum heap limit
@@ -140,6 +141,8 @@ jobs:
   unit_test:
     <<: *maven_container_configuration
 
+    environment:
+      - *sonar_integration
 
     steps:
       - *restore_repo_cache
@@ -155,6 +158,9 @@ jobs:
   integration_test:
     <<: *maven_container_configuration
 
+    environment:
+      - *sonar_integration
+
     steps:
       - *restore_repo_cache
       - *restore_dependencies_cache
@@ -168,6 +174,9 @@ jobs:
 
   acceptance_test:
     <<: *maven_container_configuration
+
+    environment:
+      - *sonar_integration
 
     steps:
       - *restore_repo_cache
@@ -189,7 +198,7 @@ jobs:
       - *restore_dependencies_cache
 
       # package all modules
-      - run: mvn package -DSkipTest
+      - run: mvn package -DskipTests
 
       - *save_dependencies_cache
       - *save_repo_cache
