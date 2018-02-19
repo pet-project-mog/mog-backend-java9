@@ -6,13 +6,38 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - develop
       - compile:
           requires:
             - checkout_code
       - unit_test:
           requires:
             - compile
+      - integration_test:
+          requires:
+            - compile
+      - acceptance_test:
+          filters:
+            branches:
+              only:
+                - release
+          requires:
+            - compile
+      - package:
+          requires:
+            - unit_test
+            - integration_test
+            - acceptance_test
+      - generate_docker_image:
+          require:
+            - package
+      - merge_with_master:
+          filters:
+            branches:
+              only:
+                - release
+          require:
+            - generate_docker_image
 
 
 version: 2
@@ -89,3 +114,80 @@ jobs:
           - dependencies-
       # run tests!
       - run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+  integration_test:
+    <<: *mavenAndworkdir
+
+    steps:
+      # Restore dependencies and repo from cache
+      - restore_cache:
+          keys:
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
+      # run tests!
+      - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+  acceptance_test:
+    <<: *mavenAndworkdir
+
+    steps:
+      # Restore dependencies and repo from cache
+      - restore_cache:
+          keys:
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
+      # run tests!
+      - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=pet-project-mog-github -Dsonar.login=796ea3c723826019f4dd591de407b22284d9bdcf
+  package:
+    <<: *mavenAndworkdir
+
+    steps:
+      # Save dependencies in cache
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: target-{{ .Environment.CIRCLE_SHA1 }}
+      # Restore dependencies and repo from cache
+      - restore_cache:
+          keys:
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
+      # run tests!
+      - run: mvn package -DSkipTest
+  generate_docker_image:
+    docker:
+      - image: docker:17.12.0-ce-git
+
+    working_directory: ~/project
+
+    steps:
+      # Restore dependencies and repo from cache
+      - restore_cache:
+          keys:
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
+          - target-{{ .Environment.CIRCLE_SHA1 }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
+      - run: find . -name "*.jar*
+      - run: docker --version
+  merge_with_master:
+    docker:
+      - image: docker:17.12.0-ce-git
+    steps:
+      # Restore dependencies and repo from cache
+      - restore_cache:
+          keys:
+          - repo-{{ .Environment.CIRCLE_SHA1 }}
+          - target-{{ .Environment.CIRCLE_SHA1 }}
+          - dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - dependencies-
+      # run tests!
+      - run: ls
+      - run: git status
+
