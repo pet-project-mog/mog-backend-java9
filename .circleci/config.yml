@@ -105,8 +105,9 @@ workflows:
       - integration_test:
           filters:
             branches:
-              ignore:
-                - master
+              only:
+                - release
+                - hotfix
           requires:
             - compile
       - acceptance_test:
@@ -114,6 +115,7 @@ workflows:
             branches:
               only:
                 - release
+                - hotfix
           requires:
             - compile
       - package:
@@ -125,12 +127,21 @@ workflows:
             - unit_test
             - integration_test
             - acceptance_test
+      - hotfix_approval:
+          type: approval
+          filters:
+            branches:
+              only:
+                - hotfix
+          requires:
+            - package
       - merge_with_master:
           filters:
             branches:
               only:
                 - release
           requires:
+            - hotfix_approval
             - package
 
 
