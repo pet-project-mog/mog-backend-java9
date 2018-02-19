@@ -86,31 +86,27 @@ workflows:
       - checkout_code:
           filters:
             branches:
-              only:
-                - feature
-                - develop
+              ignore:
+                - master
       - compile:
           filters:
             branches:
-              only:
-                - feature
-                - develop
+              ignore:
+                - master
           requires:
             - checkout_code
       - unit_test:
           filters:
             branches:
-              only:
-                - feature
-                - develop
+              ignore:
+                - master
           requires:
             - compile
       - integration_test:
           filters:
             branches:
-              only:
-                - feature
-                - develop
+              ignore:
+                - master
           requires:
             - compile
       - acceptance_test:
