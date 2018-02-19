@@ -83,24 +83,43 @@ workflows:
   version: 2
   pipeline:
     jobs:
-      - checkout_code:
+      - checkout_code
+      - compile:
           filters:
             branches:
               only:
-                - master
-      - compile:
+                - feature
+                - develop
           requires:
             - checkout_code
       - unit_test:
+          filters:
+            branches:
+              only:
+                - feature
+                - develop
           requires:
             - compile
       - integration_test:
+          filters:
+            branches:
+              only:
+                - feature
+                - develop
           requires:
             - compile
       - acceptance_test:
+          filters:
+            branches:
+              only:
+                - release
           requires:
             - compile
-      - package_and_publish_docker_image:
+      - package:
+          filters:
+            branches:
+              only:
+                - release
           requires:
             - unit_test
             - integration_test
@@ -111,7 +130,8 @@ workflows:
               only:
                 - release
           requires:
-            - package_and_publish_docker_image
+            - package
+
 
 
 
@@ -200,26 +220,31 @@ jobs:
   package:
     <<: *maven_and_docker_container_configuration
 
-    environment:
-      - *docker_integration
-      - MOG_DOCKER_IMAGE_VERSION: $CIRCLE_BUILD_NUM
-
     steps:
       - *restore_repo_cache
-      - *restore_dependencies_cache
 
-      - setup_remote_docker
+      - run: mvn package -DskipTests
 
-      - run: mvn -s settings.xml package -DskipTests
 
-      - *save_dependencies_cache
 
   #Send to Production
   merge_with_master:
     <<: *maven_and_docker_container_configuration
 
+    environment:
+      - *docker_integration
+      - MOG_DOCKER_IMAGE_VERSION: $CIRCLE_BUILD_NUM
+
     steps:
+      - setup_remote_docker
+
       - checkout
+
+      - *restore_dependencies_cache
 
       - run: git rebase release
       - run: git push origin master
+
+      - run: mvn -s settings.xml package -DskipTests
+
+      - *save_dependencies_cache
