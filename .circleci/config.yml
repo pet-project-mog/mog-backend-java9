@@ -239,6 +239,10 @@ jobs:
     steps:
       - setup_remote_docker
 
+      - add_ssh_keys:
+        fingerprints:
+          - "fb:01:d9:c1:7e:74:c3:d9:aa:89:d9:bc:92:cc:1f:e3"
+
       - checkout
 
       - *restore_dependencies_cache
