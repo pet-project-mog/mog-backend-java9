@@ -15,7 +15,7 @@ anchors_references:
   restore_cache_configuration: &restore_cache_configuration
       restore_cache:
           keys:
-          - repo-{{ .Environment.CIRCLE_SHA1 }}
+          - repo-{{ checksum "pom.xml" }}
           - dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
           - dependencies-
@@ -23,7 +23,7 @@ anchors_references:
   save_cache_configuration: &save_cache_configuration
       # Save project status
       save_cache:
-          key: repo-{{ .Environment.CIRCLE_SHA1 }}
+          key: repo-{{ checksum "pom.xml" }}
           paths:
             - ~/project
       # Save sonar and maven dependencies
