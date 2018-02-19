@@ -253,6 +253,6 @@ jobs:
       - run: git rebase release
       - run: git push origin master
 
-      - run: mvn -s settings.xml package -DskipTests -Dmog.docker.currentTag=$CIRCLE_WORKFLOW_NUM
+      - run: mvn -s settings.xml package -DskipTests -Dmog.docker.currentTag=$CIRCLE_WORKFLOW_ID
 
       - *save_dependencies_cache
