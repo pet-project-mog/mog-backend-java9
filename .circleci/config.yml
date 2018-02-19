@@ -6,13 +6,26 @@ anchors_references:
     docker:
         # specify the version you desire here
         - image: circleci/openjdk:9-jdk
-
     environment:
       # Customize the JVM maximum heap limit
       MAVEN_OPTS: -Xmx3200m
 
     working_directory: ~/project
 
+  maven_and_docker_container_configuration: &maven_and_docker_container_configuration
+    docker:
+        # specify the version you desire here
+        - image: circleci/openjdk:9-jdk
+          environment:
+            - DOCKER_HOST=tcp://docker:2375
+        - image: docker:17.12.0-ce-git
+          name: docker
+
+    environment:
+      # Customize the JVM maximum heap limit
+      MAVEN_OPTS: -Xmx3200m
+
+    working_directory: ~/project
 
   restore_repo_cache: &restore_repo_cache
       restore_cache:
@@ -85,6 +98,10 @@ workflows:
           requires:
             - package
       - merge_with_master:
+          filters:
+            branches:
+              only:
+                - release
           requires:
             - generate_docker_image
 
@@ -180,10 +197,7 @@ jobs:
 
   ## Build Application Container Image
   generate_docker_image:
-    docker:
-        - image: docker:17.12.0-ce-git
-
-    working_directory: ~/project
+    <<: *maven_and_docker_container_configuration
 
     steps:
       - *restore_repo_cache
@@ -193,9 +207,10 @@ jobs:
 
   #Send to Production
   merge_with_master:
-    docker:
-        - image: docker:17.12.0-ce-git
-    working_directory: ~/project
+    <<: *maven_and_docker_container_configuration
+
+    working_directory: ~/project/mog-backend
+
     steps:
       - *restore_repo_cache
 
