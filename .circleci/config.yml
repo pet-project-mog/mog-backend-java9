@@ -18,9 +18,9 @@ anchors_references:
       restore_cache:
           keys:
           - repo-{{ .Branch }}-{{ .Revision }}
+          - dependencies-{{ checksum "pom.xml" }}
           - repo-{{ .Branch }}
           - repo-
-          - dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
           - dependencies-
 
@@ -173,6 +173,6 @@ jobs:
       - *restore_cache_configuration
 
       - run: ls
-      - run: git status
+      - run: env
 
       - *save_cache_configuration
