@@ -89,7 +89,7 @@ jobs:
     <<: *mavenAndworkdir
 
     steps:
-      - restore_cache_configuration
+      - *restore_cache_configuration
 
       # run tests!
       - run: mvn test
