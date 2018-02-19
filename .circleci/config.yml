@@ -3,6 +3,15 @@ version: 2
 
 anchors_references:
 
+
+  checkout_all_modules: &checkout_all_modules
+    steps:
+      - checkout
+
+      # Fetch all git submodules
+      - run: git submodule sync
+      - run: git submodule update --init --recursive
+
   sonar_integration: &sonar_integration
     - SONAR_INTEGRATION: yes
 
@@ -143,12 +152,9 @@ jobs:
   checkout_code:
     <<: *maven_container_configuration
 
-    steps:
-      - checkout
+    <<: *checkout_all_modules
 
-      # Fetch all git submodules
-      - run: git submodule sync
-      - run: git submodule update --init --recursive
+    steps:
 
       - *save_repo_cache
 
@@ -219,7 +225,7 @@ jobs:
 
   ## Packaging
   package:
-    <<: *maven_and_docker_container_configuration
+    <<: *maven_container_configuration
 
     steps:
       - *restore_repo_cache
@@ -236,6 +242,8 @@ jobs:
       - *docker_integration
       - MOG_DOCKER_IMAGE_VERSION: $CIRCLE_BUILD_NUM
 
+    <<: *checkout_all_modules
+
     steps:
       - setup_remote_docker
 
@@ -243,7 +251,6 @@ jobs:
           fingerprints:
             - "fb:01:d9:c1:7e:74:c3:d9:aa:89:d9:bc:92:cc:1f:e3"
 
-      - checkout
 
       - *restore_dependencies_cache
 
