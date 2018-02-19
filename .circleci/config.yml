@@ -5,18 +5,27 @@ anchors_references:
 
   sonar_integration: &sonar_integration
     - SONAR_INTEGRATION: yes
+
   docker_integration: &docker_integration
     - DOCKER_INTEGRATION: yes
+
+  maven_opts: &maven_opts
+    # Customize the JVM maximum heap limit
+    - MAVEN_OPTS: -Xmx3200m
+
+
+  set_workdir: &set_workdir
+    working_directory: ~/project
+
 
   maven_container_configuration: &maven_container_configuration
     docker:
         # specify the version you desire here
         - image: circleci/openjdk:9-jdk
     environment:
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
+      - *maven_opts
 
-    working_directory: ~/project
+    <<: *set_workdir
 
   maven_and_docker_container_configuration: &maven_and_docker_container_configuration
     docker:
@@ -25,10 +34,9 @@ anchors_references:
         - image: docker:17.12.0-ce-git
 
     environment:
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
+      - *maven_opts
 
-    working_directory: ~/project
+    <<: *set_workdir
 
   restore_repo_cache: &restore_repo_cache
       restore_cache:
@@ -92,21 +100,18 @@ workflows:
       - acceptance_test:
           requires:
             - compile
-      - package:
+      - package_and_publish_docker_image:
           requires:
             - unit_test
             - integration_test
             - acceptance_test
-      - publish_docker_image:
-          requires:
-            - package
       - merge_with_master:
           filters:
             branches:
               only:
                 - release
           requires:
-            - publish_docker_image
+            - package_and_publish_docker_image
 
 
 
@@ -197,6 +202,7 @@ jobs:
 
     environment:
       - *docker_integration
+      - MOG_DOCKER_IMAGE_VERSION: $CIRCLE_BUILD_NUM
 
     steps:
       - *restore_repo_cache
@@ -204,32 +210,16 @@ jobs:
 
       - setup_remote_docker
 
-      # package all modules
-      - run: mvn package -DskipTests
+      - run: mvn -s settings.xml package -DskipTests
 
       - *save_dependencies_cache
-      - *save_repo_cache
-
-
-  ## Build Application Container Image
-  publish_docker_image:
-    <<: *maven_and_docker_container_configuration
-
-    steps:
-      - *restore_repo_cache
-      - setup_remote_docker
-
-      - run: find . -name "*.jar"
-      - run: docker --version
 
   #Send to Production
   merge_with_master:
     <<: *maven_and_docker_container_configuration
 
-    working_directory: ~/project/mog-backend
-
     steps:
-      - *restore_repo_cache
+      - checkout
 
-      - run: ls
-      - run: env
+      - run: git rebase release
+      - run: git push origin master
