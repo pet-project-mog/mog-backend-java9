@@ -34,7 +34,6 @@ workflows:
 
 version: 2
 
-
 jobs:
   #Phases
 
@@ -43,7 +42,6 @@ jobs:
 
     steps:
       - checkout
-
 
       # Fetch all git submodules
       - run: git submodule sync
@@ -156,25 +154,19 @@ restore_cache_configuration: &restore_cache_configuration
     restore_cache:
         keys:
         - repo-{{ .Environment.CIRCLE_SHA1 }}
-        - sonar-{{ .Environment.CIRCLE_SHA1 }}
         - dependencies-{{ checksum "pom.xml" }}
         # fallback to using the latest cache if no exact match is found
         - dependencies-
-        - sonar-
 
 save_cache_configuration: &save_cache_configuration
     # Save project status
     save_cache:
+        key: repo-{{ .Environment.CIRCLE_SHA1 }}
         paths:
           - ~/project
-        key: repo-{{ .Environment.CIRCLE_SHA1 }}
-    # Save sonar configs
+    # Save sonar and maven dependencies
     save_cache:
-        paths:
-          - ~/.sonar
-        key: sonar-{{ .Environment.CIRCLE_SHA1 }}
-    # Save maven dependencies
-    save_cache:
-        paths:
-          - ~/.m2
         key: dependencies-{{ checksum "pom.xml" }}
+        paths:
+          - ~/.m2/repository
+          - ~/.sonar/cache
