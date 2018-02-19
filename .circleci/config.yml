@@ -28,16 +28,16 @@ workflows:
             - unit_test
             - integration_test
             - acceptance_test
-      - generate_docker_image:
-          require:
-            - package
-      - merge_with_master:
-          filters:
-            branches:
-              only:
-                - release
-          require:
-            - generate_docker_image
+#      - generate_docker_image:
+#          require:
+#            - package
+#      - merge_with_master:
+#          filters:
+#            branches:
+#              only:
+#                - release
+#          require:
+#            - generate_docker_image
 
 
 version: 2
