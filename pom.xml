@@ -107,6 +107,7 @@
                 <sonar.host.url>${env.SONAR_URL}</sonar.host.url>
                 <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
                 <sonar.login>${env.SONAR_LOGIN}</sonar.login>
+                <sonar.branch.name>${env.$CIRCLE_BRANCH}</sonar.branch.name>
             </properties>
 
             <build>
