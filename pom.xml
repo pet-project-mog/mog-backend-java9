@@ -71,6 +71,24 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.spotify/hamcrest-optional -->
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>hamcrest-optional</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.spotify/hamcrest-pojo -->
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>hamcrest-pojo</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
+
+
+
     </dependencies>
 
 
