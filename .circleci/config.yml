@@ -191,7 +191,7 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn test
+      - run: mvn clean test
 
       - *save_dependencies_cache
       - *save_sonar_cache
@@ -208,7 +208,7 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn test
+      - run: mvn clean test
 
       - *save_dependencies_cache
       - *save_sonar_cache
@@ -225,7 +225,7 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn test
+      - run: mvn clean test
 
       - *save_dependencies_cache
       - *save_sonar_cache
