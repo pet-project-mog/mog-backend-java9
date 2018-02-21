@@ -81,7 +81,7 @@ anchors_references:
 
   store_surefire_report: &store_surefire_report
       store_test_results:
-        - path: target/surefire-reports
+          path: target/surefire-reports
 workflows:
   version: 2
   pipeline:
@@ -214,9 +214,7 @@ jobs:
       # run tests!
       - run: mvn clean test -Dtest=br.com.caelum.mog.integrations.**.*Test -DfailIfNoTests=false
 
-      - store_test_results:
-        - path: target/surefire-reports
-
+      - *store_surefire_report
       - *save_dependencies_cache
       - *save_sonar_cache
 
