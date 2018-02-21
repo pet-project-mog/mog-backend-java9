@@ -79,9 +79,17 @@ anchors_references:
           paths:
             - ~/.sonar/cache
 
-  store_surefire_report: &store_surefire_report
+  save_application_surefire_report: &save_application_surefire_report
       store_test_results:
-          path: target/surefire-reports
+          path: application/target/surefire-reports
+
+  save_domain_surefire_report: &save_domain_surefire_report
+      store_test_results:
+          path: domain/target/surefire-reports
+
+  save_infra_surefire_report: &save_infra_surefire_report
+      store_test_results:
+          path: infra/target/surefire-reports
 workflows:
   version: 2
   pipeline:
@@ -176,7 +184,9 @@ jobs:
       - *restore_repo_cache
 
       # Download and cache dependencies
-      - run: mvn clean compile
+      - run:
+          name: Compile Project
+          command: mvn clean compile
 
       - *save_dependencies_cache
 
@@ -194,9 +204,14 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn clean test -Dtest=!br.com.caelum.mog.acceptances.**.*Test,!br.com.caelum.mog.integrations.**.*Test -DfailIfNoTests=false
+      - run:
+          name: Running unit tests
+          command: mvn clean test "-Dtest=!%regex[.*(integrations|acceptances).*Test.class]" -DfailIfNoTests=false
 
-      - *store_surefire_report
+      - *save_application_surefire_report
+      - *save_domain_surefire_report
+      - *save_infra_surefire_report
+
       - *save_dependencies_cache
       - *save_sonar_cache
 
@@ -212,9 +227,14 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn clean test -Dtest=br.com.caelum.mog.integrations.**.*Test -DfailIfNoTests=false
+      - run:
+          name: Running integration tests
+          command: mvn clean test "-Dtest=%regex[.*integrations.*Test.class]" -DfailIfNoTests=false
 
-      - *store_surefire_report
+      - *save_application_surefire_report
+      - *save_domain_surefire_report
+      - *save_infra_surefire_report
+
       - *save_dependencies_cache
       - *save_sonar_cache
 
@@ -230,9 +250,14 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn clean test -Dtest=br.com.caelum.mog.acceptances.**.*Test -DfailIfNoTests=false
+      - run:
+          name: Running acceptance tests
+          command: mvn clean test "-Dtest=%regex[.*acceptances.*Test.class]" -DfailIfNoTests=false
 
-      - *store_surefire_report
+      - *save_application_surefire_report
+      - *save_domain_surefire_report
+      - *save_infra_surefire_report
+
       - *save_dependencies_cache
       - *save_sonar_cache
 
@@ -243,7 +268,9 @@ jobs:
     steps:
       - *restore_repo_cache
 
-      - run: mvn package -DskipTests
+      - run:
+          name: Packaging application
+          command: mvn package -DskipTests
 
       - store_artifacts:
           path: application/target/application-1.0-SNAPSHOT.jar
@@ -275,6 +302,8 @@ jobs:
       - run: git rebase $CIRCLE_BRANCH
       - run: git push origin master
 
-      - run: mvn -s settings.xml package -DskipTests -Dmog.docker.currentTag=$CIRCLE_WORKFLOW_ID
+      - run:
+          name: Generating Docker Image
+          command: mvn -s settings.xml package -DskipTests -Dmog.docker.currentTag=$CIRCLE_WORKFLOW_ID
 
       - *save_dependencies_cache
