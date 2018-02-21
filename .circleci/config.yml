@@ -18,6 +18,7 @@ anchors_references:
     working_directory: ~/project
 
 
+
   maven_container_configuration: &maven_container_configuration
     docker:
         # specify the version you desire here
@@ -78,7 +79,9 @@ anchors_references:
           paths:
             - ~/.sonar/cache
 
-
+  store_surefire_report: &store_surefire_report
+      store_test_results:
+          - path: target/surefire-reports
 workflows:
   version: 2
   pipeline:
@@ -191,8 +194,9 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn clean test
+      - run: mvn clean test -Dtest=!br.com.caelum.mog.acceptances.**.*Test,!br.com.caelum.mog.integrations.**.*Test -DfailIfNoTests=false
 
+      - *store_surefire_report
       - *save_dependencies_cache
       - *save_sonar_cache
 
@@ -208,8 +212,9 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn clean test
+      - run: mvn clean test -Dtest=br.com.caelum.mog.integrations.**.*Test -DfailIfNoTests=false
 
+      - *store_surefire_report
       - *save_dependencies_cache
       - *save_sonar_cache
 
@@ -225,8 +230,9 @@ jobs:
       - *restore_sonar_cache
 
       # run tests!
-      - run: mvn clean test
+      - run: mvn clean test -Dtest=br.com.caelum.mog.acceptances.**.*Test -DfailIfNoTests=false
 
+      - *store_surefire_report
       - *save_dependencies_cache
       - *save_sonar_cache
 
@@ -238,6 +244,9 @@ jobs:
       - *restore_repo_cache
 
       - run: mvn package -DskipTests
+
+      - store_artifacts:
+          path: application/target/application-1.0-SNAPSHOT.jar
 
 
 
