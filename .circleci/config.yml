@@ -81,7 +81,7 @@ anchors_references:
 
   store_surefire_report: &store_surefire_report
       store_test_results:
-          - path: target/surefire-reports
+        - path: target/surefire-reports
 workflows:
   version: 2
   pipeline:
