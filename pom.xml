@@ -191,7 +191,6 @@
                     <execution>
                         <id>default-compile</id>
                         <configuration>
-                            <!-- compile everything to ensure module-info contains right entries -->
                             <release>9</release>
                         </configuration>
                     </execution>
