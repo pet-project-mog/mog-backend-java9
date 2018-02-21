@@ -206,7 +206,7 @@ jobs:
       # run tests!
       - run:
           name: Running unit tests
-          command: mvn clean test "-Dtest=!%regex[.*(integrations|acceptances).*Test.class]" -DfailIfNoTests=false
+          command: find $(pwd) -path "*/classes" | tr '\n' ',' | xargs -I paths mvn clean test "-Dtest=!%regex[.*(integrations|acceptances).*Test.class]" -DfailIfNoTests=false -Dsonar.java.binaries=paths
 
       - *save_application_surefire_report
       - *save_domain_surefire_report
@@ -229,7 +229,7 @@ jobs:
       # run tests!
       - run:
           name: Running integration tests
-          command: mvn clean test "-Dtest=%regex[.*integrations.*Test.class]" -DfailIfNoTests=false
+          command: find $(pwd) -path "*/classes" | tr '\n' ',' | xargs -I paths mvn clean test "-Dtest=%regex[.*integrations.*Test.class]" -DfailIfNoTests=false -Dsonar.java.binaries=paths
 
       - *save_application_surefire_report
       - *save_domain_surefire_report
@@ -252,7 +252,7 @@ jobs:
       # run tests!
       - run:
           name: Running acceptance tests
-          command: mvn clean test "-Dtest=%regex[.*acceptances.*Test.class]" -DfailIfNoTests=false
+          command: find $(pwd) -path "*/classes" | tr '\n' ',' | xargs -I paths mvn clean test "-Dtest=%regex[.*acceptances.*Test.class]" -DfailIfNoTests=false -Dsonar.java.binaries=paths
 
       - *save_application_surefire_report
       - *save_domain_surefire_report
