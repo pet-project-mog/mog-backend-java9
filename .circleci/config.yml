@@ -81,15 +81,15 @@ anchors_references:
 
   save_application_surefire_report: &save_application_surefire_report
       store_test_results:
-          path: application/target/surefire-reports
+          path: ~/project/application/target/surefire-reports
 
   save_domain_surefire_report: &save_domain_surefire_report
       store_test_results:
-          path: domain/target/surefire-reports
+          path: ~/project/domain/target/surefire-reports
 
   save_infra_surefire_report: &save_infra_surefire_report
       store_test_results:
-          path: infra/target/surefire-reports
+          path: ~/project/infra/target/surefire-reports
 workflows:
   version: 2
   pipeline:
